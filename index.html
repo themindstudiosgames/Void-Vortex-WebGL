@@ -25,51 +25,95 @@
 			position: absolute;
 		}
 
-		div#gameContainer canvas[data-pixel-art="true"] {
-			position: absolute;
-			image-rendering: optimizeSpeed;
-			image-rendering: -webkit-crisp-edges;
-			image-rendering: -moz-crisp-edges;
-			image-rendering: -o-crisp-edges;
-			image-rendering: crisp-edges;
-			image-rendering: -webkit-optimize-contrast;
-			image-rendering: optimize-contrast;
-			image-rendering: pixelated;
-			-ms-interpolation-mode: nearest-neighbor;
-		}
-	</style>
+        div#gameContainer canvas[data-pixel-art="true"] {
+            position: absolute;
+            image-rendering: optimizeSpeed;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimize-contrast;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+
+        /* Loader Styles */
+        #loader {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #7373cb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #progress-bar-container {
+            width: 50%;
+            background-color: #ba7ecc;
+            border: 3px solid #af62c8;
+            border-radius: 15px;
+        }
+
+        #progress-bar {
+            width: 0;
+            height: 30px;
+            background-color: #e89efe;
+            border-radius: 15px;
+        }
+
+        #progress-text {
+            color: #fff;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 
 <body>
-	<div id="gameContainer">
-		<canvas id="unity-canvas" data-pixel-art=""></canvas>
-		<script src="Build/Void-Vortex-WebGL.loader.js"></script>
-		<script>
-			var canvas = document.querySelector("#unity-canvas");
-			var config = {
-				dataUrl: "Build/Void-Vortex-WebGL.data",
-				frameworkUrl: "Build/Void-Vortex-WebGL.framework.js",
-				codeUrl: "Build/Void-Vortex-WebGL.wasm",
-				streamingAssetsUrl: "StreamingAssets",
-				companyName: "Dubbz",
-				productName: "Void Vortex",
-				productVersion: "1.0.2",
-			};
-			var scaleToFit;
-			try {
-				scaleToFit = !!JSON.parse("false");
-			} catch (e) {
-				scaleToFit = true;
-			}
-			function progressHandler(progress) {
-				var percent = progress * 100 + '%';
-				canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
-				canvas.style.backgroundSize = '100% 1rem';
-			}
-			function onResize() {
-				var container = canvas.parentElement;
-				var w;
-				var h;
+<div id="gameContainer">
+    <canvas id="unity-canvas" data-pixel-art=""></canvas>
+    <div id="loader">
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="progress-text">Loading... 0%</div>
+    </div>
+    <script src="Build/Void-Vortex-WebGL.loader.js"></script>
+    <script>
+        var canvas = document.querySelector("#unity-canvas");
+        var loader = document.querySelector("#loader");
+        var progressBar = document.querySelector("#progress-bar");
+        var progressText = document.querySelector("#progress-text");
+
+        var config = {
+            dataUrl: "Build/Void-Vortex-WebGL.data",
+            frameworkUrl: "Build/Void-Vortex-WebGL.framework.js",
+            codeUrl: "Build/Void-Vortex-WebGL.wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "Dubbz",
+            productName: "Void Vortex",
+            productVersion: "1.0.2",
+        };
+
+        var scaleToFit;
+        try {
+            scaleToFit = !!JSON.parse("false");
+        } catch (e) {
+            scaleToFit = true;
+        }
+
+        function progressHandler(progress) {
+            var percent = Math.round(progress * 100) + '%';
+            progressBar.style.width = percent;
+            progressText.textContent = 'Loading... ' + percent;
+        }
+
+        function onResize() {
+            var container = canvas.parentElement;
+            var w;
+            var h;
 
 				if (scaleToFit) {
 					w = window.innerWidth;
@@ -86,27 +130,29 @@
 					h = window.innerHeight;
 				}
 
-				container.style.width = canvas.style.width = w + "px";
-				container.style.height = canvas.style.height = h + "px";
-				container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
-				container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
-			}
-			createUnityInstance(canvas, config, progressHandler).then(function (instance) {
-				canvas = instance.Module.canvas;
-				onResize();
-			});
-			window.addEventListener('resize', onResize);
-			onResize();
+            container.style.width = canvas.style.width = w + "px";
+            container.style.height = canvas.style.height = h + "px";
+            container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
+            container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
+        }
 
-			if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-				// Mobile device style: fill the whole browser client area with the game canvas:
-				const meta = document.createElement('meta');
-				meta.name = 'viewport';
-				meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-				document.getElementsByTagName('head')[0].appendChild(meta);
-			}
-		</script>
-	</div>
+        createUnityInstance(canvas, config, progressHandler).then(function (instance) {
+            canvas = instance.Module.canvas;
+            loader.style.display = 'none';  // Hide the loader once the game is loaded
+            onResize();
+        });
+
+        window.addEventListener('resize', onResize);
+        onResize();
+
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            const meta = document.createElement('meta');
+            meta.name = 'viewport';
+            meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+            document.getElementsByTagName('head')[0].appendChild(meta);
+        }
+    </script>
+</div>
 </body>
 
 </html>
