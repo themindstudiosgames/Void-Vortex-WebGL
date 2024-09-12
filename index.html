@@ -3,8 +3,9 @@
 
 <head>
 	<meta charset="utf-8">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Void Vortex</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+    <title>Void Vortex</title>
 	<style>
 		html,
 		body {
@@ -51,35 +52,40 @@
         }
 
         #progress-bar-container {
+            position: relative;
+            z-index: 10;
             width: 50%;
             background-color: #ba7ecc;
             border: 3px solid #af62c8;
             border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
         }
 
         #progress-bar {
             width: 0;
             height: 30px;
             background-color: #e89efe;
-            border-radius: 15px;
+            border-radius: 12px;
         }
 
         #progress-text {
             color: #fff;
-            margin-top: 20px;
+            text-align: center;
+            margin-top: 10px;
         }
     </style>
 </head>
 
 <body>
 <div id="gameContainer">
-    <canvas id="unity-canvas" data-pixel-art=""></canvas>
     <div id="loader">
         <div id="progress-bar-container">
             <div id="progress-bar"></div>
         </div>
         <div id="progress-text">Loading... 0%</div>
     </div>
+    <canvas id="unity-canvas" data-pixel-art=""></canvas>
     <script src="Build/Void-Vortex-WebGL.loader.js"></script>
     <script>
         var canvas = document.querySelector("#unity-canvas");
